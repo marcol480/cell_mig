@@ -25,6 +25,7 @@
 #define N_TRIALS 100
 
 
+
 struct vector {
 
     double x;
@@ -79,10 +80,10 @@ void get_polar_coords(struct vector * ,  double * ,  double * , int );
 
 void project_position(struct vector * , struct vector * , struct vector * , struct vector * , struct vector * ,  int );
 
-void get_dipole(struct vector * , struct vector  , struct vector * ,  struct dipole_term *, int,  int , int );
+void get_dipole(struct vector * , struct vector  , struct vector * ,  struct dipole_term *, int,  int  );
 
 
-void get_quadrupole(struct vector * , struct vector , struct vector * , struct dipole_term * , struct quadrupole_term * , int , int, int );
+void get_quadrupole(struct vector * , struct vector , struct vector * , struct dipole_term * , struct quadrupole_term * , int , int );
 
 
 void get_dipole_axis(double * , double * , struct dipole_term * , double * , double * , double *, double * );
@@ -132,7 +133,6 @@ int main()
     char file_name_centre[550], file_name_pos[550], file_name_vel[550], file_name_dip[550], file_name_quad[550],  file_name_omega[550], file_name_tract[550], file_name_max_eigenv[550], file_name_angle_eigenv[550], file_name_angle_eigenv_axis[550], file_name_angle_cell_speed[550], file_name_speed_cell[550], file_name_angle_cell_speed_axis[550], file_name_monop[550], file_name_cell_pos[550];
 
 
-
     /*** output files ***/
     sprintf(file_name_cell_pos, "results-analysis/cell_pos_new.dat");
     out_cell_pos=fopen(file_name_cell_pos,"w");
@@ -154,29 +154,28 @@ int main()
 
     sprintf(file_name_speed_cell, "results-analysis/cell_speed.dat");
     out_speed_cell = fopen(file_name_speed_cell,"w");
-
+    
     sprintf(file_name_angle_cell_speed, "results-analysis/angles_cell_speed.dat");
     out_angle_cell_speed = fopen(file_name_angle_cell_speed,"w");
-
+    
     sprintf(file_name_angle_cell_speed_axis, "results-analysis/axis_cell_speed.dat");
     out_angle_cell_speed_axis = fopen(file_name_angle_cell_speed_axis,"w");
 
-    
     int aa;
-    
-    for( aa = 90; aa < N_TRIALS; aa++){
-        
+    for( aa = 0; aa < N_TRIALS; aa++){
+
         sprintf(file_name_dip, "results-analysis/dipole_trial%d.dat", aa);
         out_dip=fopen(file_name_dip,"w");
         
         sprintf(file_name_quad, "results-analysis/cell_quadrdupole_trial%d.dat", aa);
         out_quad=fopen(file_name_quad,"w");
-
+        
         sprintf(file_name_monop, "results-analysis/monopole_trial%d.dat", aa);
         out_monop = fopen(file_name_monop,"w");
 
         
-        
+
+
     /********* cell pos *****************/
 
     sprintf(file_name_centre, "cell-pos.dat"); //read positions files
@@ -218,7 +217,6 @@ int main()
     double angle;
 
     angle = 0.0 ;
-    //angle = 2.8842689386187046;
 
     u.x = cos(angle);
     u.y = sin(angle);
@@ -226,10 +224,9 @@ int main()
     u_perp.x = sin(angle);
     u_perp.y = -cos(angle);
 
-    projection_cell_axis( &cell_traject[0], &cell_initial_pos, &u,  &u_perp,  cellpos,
-                         cellvel, cellanglepos, cellanglevel,  sizenew);
+    projection_cell_axis( &cell_traject[0], &cell_initial_pos, &u,  &u_perp,  cellpos, cellvel, cellanglepos, cellanglevel,  sizenew);
 
-    
+
     for ( a = 0; a < sizenew; a++ ){
 
         if( cellanglevel[a] > 0.5*M_PI) cellanglevel_axis[a] = cellanglevel[a]-M_PI;
@@ -307,7 +304,6 @@ int main()
       printf( "realiz %d size %d \n", k, sizes[k] );
 
       for ( i = 0; i < sizes[k]; i++ ) fscanf( fptr, "%lf %lf", &data_pos[i].x, &data_pos[i].y);
-      //att correct here
       fclose(fptr);
 
       /************ open velocity (deformation rate) file  *************/
@@ -324,7 +320,6 @@ int main()
       if ( data_vel == NULL ) printf( "Error alocating memory\n" ), exit( 0 );
 
       for ( i = 0; i < sizes[k]; i++ ) fscanf( fptr, "%lf %lf", &data_vel[i].x, &data_vel[i].y);
-      //att correct here
 
       fclose(fptr);
 
@@ -334,10 +329,10 @@ int main()
 
 
       pos =(struct vector *)malloc(sizes[k] *sizeof(struct vector));
-      vel =(struct vector*)malloc(sizes[k] *sizeof(struct vector));
+      vel =(struct vector *)malloc(sizes[k] *sizeof(struct vector));
 
       pos_dip_axis =(struct vector *)malloc(sizes[k] *sizeof(struct vector));
-      vel_dip_axis =(struct vector*)malloc(sizes[k] *sizeof(struct vector));
+      vel_dip_axis =(struct vector *)malloc(sizes[k] *sizeof(struct vector));
 
       velX =(double*)malloc(sizes[k] *sizeof(double));
       velY =(double*)malloc(sizes[k] *sizeof(double));
@@ -358,21 +353,21 @@ int main()
           
           pos_dip_axis[i].x = 0 ;
           pos_dip_axis[i].y = 0 ;
-          
+
           vel_dip_axis[i].x = 0 ;
           vel_dip_axis[i].y = 0 ;
-          
+
           magnpos[i] = 0;
           magnvel[i] = 0;
           
           anglepos[i]= 0;
           anglevel[i]= 0;
-          
+
           velX[i] = 0 ;
           velY[i] = 0 ;
           
       }
-
+      
       project_traction( &data_vel[0], &u, &u_perp, &vel[0],   sizes[k]);
 
       project_position( &data_pos[0], &cell_initial_pos, &u, &u_perp, &pos[0], sizes[k]);
@@ -423,8 +418,6 @@ int main()
               }
       }
 
-
-
       /***** media, varianza, max e min  ******/
 
         meanmagnitudestress = gsl_stats_mean(magnvel, 1, sizes[k]);
@@ -432,52 +425,56 @@ int main()
 
         meanmagnitudepos = gsl_stats_mean(magnpos, 1, sizes[k]);
         variancemagnitudepos = gsl_stats_variance(magnpos, 1, sizes[k]);
-      
+
+      printf("magnit pos % lf\n", meanmagnitudepos);
       
       int countereffective = 0 ;
       double dist_x, dist_y, check_dist;
       
-        for( i = 0; i < sizes[k]; i++){
-            
-            dist_x= pos[i].x - cell_traject[k].x ;
-            dist_y= pos[i].y - cell_traject[k].y;
+      for( i = 0; i < sizes[k]; i++){
+          
+          dist_x= pos[i].x - cell_traject[k].x ;
+          dist_y= pos[i].y - cell_traject[k].y;
+          
+          check_dist = sqrt( (dist_x)*(dist_x) + (dist_y)*(dist_y) );
+          
+          if( (int)check_dist  < 360 + aa*4){
+              
+              velX[i] = vel[i].x;
+              velY[i] = vel[i].y;
+              
+              countereffective++;
+              
+          }
+          
+          else{
+              
+              velX[i] = 0 ;
+              velY[i] = 0 ;
+          }
+          
+          
+          
+      }
 
-            check_dist = sqrt( (dist_x)*(dist_x) + (dist_y)*(dist_y) );
-            
-            if( (int)check_dist  < 11600 + aa*4){
-                
-                velX[i] = vel[i].x;
-                velY[i] = vel[i].y;
+        meanvelx = ( gsl_stats_mean(velX, 1, sizes[k]) ) ;
+        meanvely = ( gsl_stats_mean(velY, 1, sizes[k]) ) ;
 
-                countereffective++;
-                
-            }
-            
-            else{
-                
-                velX[i] = 0 ;
-                velY[i] = 0 ;
-            }
-
-
-
-        }
-
-        meanvelx = ( gsl_stats_mean(velX, 1, countereffective ) ) ;
-        meanvely = ( gsl_stats_mean(velY, 1, countereffective ) ) ;
-
-        variancevelx = gsl_stats_variance(velX, 1, countereffective ) ;
-        variancevely = gsl_stats_variance(velY, 1, countereffective) ;
-
+        variancevelx = gsl_stats_variance(velX, 1, sizes[k]) ;
+        variancevely = gsl_stats_variance(velY, 1, sizes[k]) ;
 
         countereffective = 0;
 
+      dipole.xx = 0;
+      dipole.xy = 0;
+      dipole.yx = 0;
+      dipole.yy = 0;
 
       if(OLD_METHOD == 1){
 
 
-          get_dipole(&data_pos[0],   cell_traject[k],  &data_vel[0],  &dipole,  screening = 0,  sizes[k] ,aa );
-          get_quadrupole(&data_pos[0],   cell_traject[k],  &data_vel[0],  &dipole, &quadrupole,  screening = 0,  sizes[k], aa );
+          get_dipole(&data_pos[0],   cell_traject[k],  &data_vel[0],  &dipole,  screening = 0,  sizes[k] );
+          get_quadrupole(&data_pos[0],   cell_traject[k],  &data_vel[0],  &dipole, &quadrupole,  screening = 0,  sizes[k] );
 
 
       }
@@ -485,8 +482,8 @@ int main()
 
       if(ALONG_CELL_AXIS == 1){
 
-          get_dipole(&pos[0],   cellpos[k],  &vel[0],  &dipole,  screening = 0,  sizes[k] , aa);
-          get_quadrupole(&pos[0],   cellpos[k],  &vel[0],  &dipole, &quadrupole,  screening = 0,  sizes[k], aa );
+          get_dipole(&pos[0],   cellpos[k],  &vel[0],  &dipole,  screening = 0,  sizes[k] );
+          get_quadrupole(&pos[0],   cellpos[k],  &vel[0],  &dipole, &quadrupole,  screening = 0,  sizes[k] );
 
       }
 
@@ -494,7 +491,7 @@ int main()
 
       if(ALONG_DIPOLE_AXIS == 1){
 
-          get_dipole(&data_pos[0],   cell_traject[k],  &data_vel[0],  &dipole,  screening = 0,  sizes[k] , aa);
+          get_dipole(&data_pos[0],   cell_traject[k],  &data_vel[0],  &dipole,  screening = 0,  sizes[k] );
 
           get_dipole_axis(&trace, &determ, &dipole, &max_eigenv,  &min_eigenv, &angle_min_eigenv, &angle_max_eigenv);
 
@@ -510,9 +507,9 @@ int main()
 
           project_position( &data_pos[0], &dipole_center[k], &u_dip, &u_dip_perp, &pos_dip_axis[0],  sizes[k]);
 
-          get_dipole(&pos_dip_axis[0],   dipole_center[k],  &vel_dip_axis[0],  &dipole,  screening = 0,  sizes[k], aa);
+          get_dipole(&pos_dip_axis[0],   dipole_center[k],  &vel_dip_axis[0],  &dipole,  screening = 0,  sizes[k] );
 
-          get_quadrupole(&pos_dip_axis[0],   dipole_center[k],  &vel_dip_axis[0],  &dipole, &quadrupole,  screening = 0,  sizes[k], aa );
+          get_quadrupole(&pos_dip_axis[0],   dipole_center[k],  &vel_dip_axis[0],  &dipole, &quadrupole,  screening = 0,  sizes[k] );
 
       }
 
@@ -555,27 +552,25 @@ int main()
       fprintf(out_speed_cell,"%d\t %lf\t %lf\t %lf\n", k, cellvel[k].x, cellvel[k].y, cellvel[k].x*cellvel[k].x + cellvel[k].y*cellvel[k].y);
 
       fprintf(out_cell_pos,"%lf\t %lf\n", cellpos[k].x, cellpos[k].y);
-          
-          
+      
       fprintf(out_tract,"%d\t %lf\t %lf\t %lf\t %lf\n",k, meanmagnitudestress,variancemagnitudestress , meanmagnitudepos, variancemagnitudepos );
-          
 
+      
       }
-
+      
       fprintf(out_quad,"%d\t %lf\t %lf\t %lf\t %lf\t %lf\t %lf\t %lf\t %lf\n",k, quadrupole.xxx, quadrupole.xxy, quadrupole.xyx, quadrupole.xyy,
               quadrupole.yxx, quadrupole.yxy, quadrupole.yyx, quadrupole.yyy);
-      
+
       fprintf(out_dip,"%d\t %lf\t  %lf\t %lf\t %lf\t %lf\t %lf\n",k, dipole.xx, dipole.xy , dipole.yx , dipole.yy, trace, determ);
 
       fprintf(out_monop,"%d\t %lf\t %lf\t %lf\t %lf\n", k, meanvelx, variancevelx,  meanvely, variancevely);
 
-
-      
       free(data_pos);
       free(data_vel);
 
       free(pos);
       free(vel);
+
 
       free(anglepos);
       free(anglevel);
@@ -585,20 +580,19 @@ int main()
 
 
 
-    } // k --- N_RIP2
-
+        } // k --- N_RIP2
         
         fclose(out_quad);
         fclose(out_dip);
         fclose(out_monop);
-
+        
         if(aa > 1){
             fclose(out_cell_pos);
-
+            
         }
 
-    }
 
+    }
 
   return(0);
 }
@@ -627,12 +621,13 @@ for ( a = 0; a < sizenew; a++ ){
     cellpos[a].x =  (cell_traject[a].x-cell_initial_pos->x)*u->x + (cell_traject[a].y-cell_initial_pos->y)*u->y ;
     cellpos[a].y =   (cell_traject[a].x-cell_initial_pos->x)*u_perp->x + (cell_traject[a].y-cell_initial_pos->y)*u_perp->y ;
 
+    
     cellanglepos[a]= atan2(cellpos[a].y, cellpos[a].x);
 
     if( a <= sizenew-2){
 
-        cellvel[a].x = (cell_traject[a+1].x - cell_traject[a].x)*u->x  + (cell_traject[a+1].y - cell_traject[a].y)*u->y ;
-        cellvel[a].y = (cell_traject[a+1].y - cell_traject[a].y)*u_perp->y  + (cell_traject[a+1].x - cell_traject[a].x)*u_perp->x   ;
+        cellvel[a].x = (cell_traject[a+1].x - cell_traject[a].x)*u->x + (cell_traject[a+1].y - cell_traject[a].y)*u->y ;
+        cellvel[a].y = (cell_traject[a+1].x - cell_traject[a].x)*u_perp->x + (cell_traject[a+1].y - cell_traject[a].y)*u_perp->y  ;
 
         cellanglevel[a]= atan2(cellvel[a].y, cellvel[a].x);
 
@@ -642,7 +637,8 @@ for ( a = 0; a < sizenew; a++ ){
 
         cellvel[a].x = 0.0 ;
         cellvel[a].y = 0.0 ;
-        cellanglevel[a] = 0.0;
+        cellanglevel[a] = 0.0 ;
+        
     }
 
 }
@@ -667,7 +663,7 @@ void get_polar_coords(struct vector * v,  double * angle,  double * magnitude, i
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  project traction on a given axis
+//  project traction on a given axis ATT HERE CHANGE COMPARED TO THE CASE OF EXPERIMENTS
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -679,16 +675,16 @@ void project_traction(struct vector * data_vel, struct vector * u, struct vector
 
     for( i = 0; i < siz; i++){
 
-        vel[i].x =  data_vel[i].x*u->x ; //+ data_vel[i].y*u->y;
-        vel[i].y =  data_vel[i].y*u_perp->y ; // + data_vel[i].x*u_perp->x ;
-        //printf("%lf \n", u->x);
+        vel[i].x =  data_vel[i].x*u->x + data_vel[i].y*u->y;
+        vel[i].y =  data_vel[i].y*u_perp->y+ data_vel[i].x*u_perp->x ;
+        
 
     }
 
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  project position on a given axis
+//  project position on a given axis ATT HERE CHANGE COMPARED TO THE CASE OF EXPERIMENTS
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -698,10 +694,8 @@ void project_position(struct vector * data_pos, struct vector * new_origin, stru
 
     for( i = 0; i < siz; i++){
 
-        pos[i].y = (data_pos[i].x)*u->x ; //+ (data_pos[i].x-new_origin->y)*u->y; // att this is correct
-        pos[i].x = (data_pos[i].y)*u_perp->y ; // + (data_pos[i].y-new_origin->x)*u_perp->x ; // att this is correct
-        //    pos[i].y = data_pos[i].x ; // att this is correct
-        //    pos[i].x = data_pos[i].y ; // att this is correct
+        pos[i].x = (data_pos[i].x-new_origin->x)*u->x  + (data_pos[i].y-new_origin->y)*u->y ; // att this is correct
+        pos[i].y =  (data_pos[i].y-new_origin->y)*u_perp->y + (data_pos[i].x-new_origin->x)*u_perp->x ; // att this is correct
 
 
     }
@@ -714,11 +708,11 @@ void project_position(struct vector * data_pos, struct vector * new_origin, stru
 //     Dipole
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-void get_dipole(struct vector * pos, struct vector cellposs, struct vector * vel, struct dipole_term * dipole, int screening, int siz, int aa ){
+void get_dipole(struct vector * pos, struct vector cellposs, struct vector * vel, struct dipole_term * dipole, int screening, int siz ){
 
 
-    int i , countereffective;
-    double screen, check_dist, dipolemix, dist_x, dist_y;
+    int i ;
+    double screen, dipolemix, dist_x, dist_y;
 
     dipole->xx = 0 ;
     dipole->xy = 0 ;
@@ -726,38 +720,21 @@ void get_dipole(struct vector * pos, struct vector cellposs, struct vector * vel
     dipole->yy = 0 ;
     dipolemix = 0 ;
 
-    countereffective = 0 ;
-    
-    
     for( i = 0; i < siz; i++){
 
         dist_x = pos[i].x - cellposs.x ;
         dist_y = pos[i].y - cellposs.y ;
 
+
         if( screening == 1 ){
 
             screen = (dist_x)*(dist_x) + (dist_y)*(dist_y);
-
             if(isnan(screen)==1) printf("problem with the screening computation %lf\n", screen ), exit(0);
 
         }
 
 
         else screen = 1. ;
-
-        check_dist = sqrt((dist_x)*(dist_x) + (dist_y)*(dist_y) );
-
-        if( (int)check_dist  < 600 + aa*4){
-            
-            countereffective++;
-            
-        }
-        
-        else{
-            
-            dist_x=0;
-            dist_y=0;
-        }
 
 
         dipole->xx += (dist_x*vel[i].x)/screen;
@@ -767,12 +744,12 @@ void get_dipole(struct vector * pos, struct vector cellposs, struct vector * vel
 
         }
 
-    if (countereffective > 0) {
+    if (siz > 0){
 
-        dipole->xx /= (double)countereffective;
-        dipole->yy /= (double)countereffective;
+        dipole->xx /= (double)siz;
+        dipole->yy /= (double)siz;
 
-        dipolemix = (0.5*(dipole->xy + dipole->yx))/(double)countereffective;   //  symmetric part of the dipole tensor
+        dipolemix = (0.5*(dipole->xy + dipole->yx))/(double)siz;   //  symmetric part of the dipole tensor
 
         dipole->xy = dipolemix;
         dipole->yx = dipolemix;
@@ -787,11 +764,10 @@ void get_dipole(struct vector * pos, struct vector cellposs, struct vector * vel
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void get_quadrupole(struct vector * pos, struct vector cellposs, struct vector * vel,
-                                    struct dipole_term * dipole, struct quadrupole_term * quadrupole, int screening, int siz , int aa){
+                                    struct dipole_term * dipole, struct quadrupole_term * quadrupole, int screening, int siz ){
 
-    int i, countereffective;
-;
-    double screen, check_dist, screening_quad, dist_x, dist_y;
+    int i;
+    double screen, screening_quad, dist_x, dist_y;
 
     quadrupole->xxx = 0 ;
     quadrupole->xxy = 0 ;
@@ -802,14 +778,13 @@ void get_quadrupole(struct vector * pos, struct vector cellposs, struct vector *
     quadrupole->yxy = 0 ;
     quadrupole->yyx = 0 ;
     quadrupole->yyy = 0 ;
-    
-    countereffective = 0 ;
 
     for( i = 0; i < siz; i++){
 
         dist_x = pos[i].x - cellposs.x;
         dist_y = pos[i].y - cellposs.y;
-        
+
+
         if(screening==1) {
 
             screen = (dist_x)*(dist_x) + (dist_y)*(dist_y);
@@ -819,24 +794,10 @@ void get_quadrupole(struct vector * pos, struct vector cellposs, struct vector *
 
         else screen = 1. ;
 
-        check_dist = sqrt((dist_x)*(dist_x) + (dist_y)*(dist_y));
-
-        if( (int)check_dist  < 600 + aa*4){
-            
-            countereffective++;
-            
-        }
-        
-        else{
-            
-            dist_x=0;
-            dist_y=0;
-        }
-
         screening_quad = screen*screen;
 
         quadrupole->xxx += (dist_x*dist_x*vel[i].x)/screening_quad;
-        quadrupole->xxy += (dist_x*dist_x*vel[i].y)/screening_quad;
+        quadrupole->xxy += (dist_x*dist_x*vel[i].y)/screening_quad ;
         quadrupole->xyx += (dist_x*dist_y*vel[i].x)/screening_quad;
         quadrupole->xyy += (dist_x*dist_y*vel[i].y)/screening_quad;
 
@@ -847,6 +808,7 @@ void get_quadrupole(struct vector * pos, struct vector cellposs, struct vector *
 
         if(SUBTRACT_DIPOLE == 1){
 
+
             quadrupole->xxx  -= dist_x*dipole->xx;
             quadrupole->xxy  -= dist_x*dipole->xy;
             quadrupole->xyx  -= dist_x*dipole->yx;
@@ -854,29 +816,30 @@ void get_quadrupole(struct vector * pos, struct vector cellposs, struct vector *
             quadrupole->yxx  -= dist_y*dipole->xx;
             quadrupole->yxy  -= dist_y*dipole->xy;
             quadrupole->yyx  -= dist_y*dipole->yx;
-            quadrupole->yyy  -= dist_x*dipole->yy;
+            quadrupole->yyy -=  dist_x*dipole->yy;
 
         }
 
     }
 
-    if (countereffective > 0) {
+    if (siz > 0) {
 
 
-        quadrupole->xxx  /= (double)countereffective;
-        quadrupole->xxy  /= (double)countereffective;
-        quadrupole->xyx  /= (double)countereffective;
-        quadrupole->xyy  /= (double)countereffective;
+        quadrupole->xxx  /= (double)siz;
+        quadrupole->xxy  /= (double)siz ;
+        quadrupole->xyx  /= (double)siz;
+        quadrupole->xyy  /= (double)siz;
 
-        quadrupole->yxx  /= (double)countereffective;
-        quadrupole->yxy  /= (double)countereffective;
-        quadrupole->yyx   /= (double)countereffective;
-        quadrupole->yyy   /= (double)countereffective;
+        quadrupole->yxx  /= (double)siz;
+        quadrupole->yxy  /= (double)siz;
+        quadrupole->yyx   /= (double)siz;
+        quadrupole->yyy   /= (double)siz;
 
 
 
     }
- }
+
+                           }
 
 
 
